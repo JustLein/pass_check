@@ -78,16 +78,30 @@ class PasswordAnalyzer:
         return weaknesses, suggestions
 
     def _checkHybrid(self, password):
+        """Aturan #3: Cek Hybrid yang Diperkuat (Strip & Check)."""
         weaknesses = []
         suggestions = []
         
+
+        # 1. Ambil HANYA huruf dari password (buang angka & simbol)
+        kata_bersih = "".join(filter(str.isalpha, password)).lower()
+        
+        # 2. Cek apakah kata bersih tersebut ada di kamus
+        # Syarat: Panjang kata harus > 3 agar tidak mendeteksi kata terlalu pendek (misal 'a' atau 'is')
+        if len(kata_bersih) > 3:
+            if self.loader.isInDictionary(kata_bersih):
+                weaknesses.append("HYBRID_MATCH")
+                suggestions.append(f"Kata sandi ini hanyalah kata umum '{kata_bersih}' yang ditambahi angka/simbol. Sangat mudah ditebak.")
+                return weaknesses, suggestions # Langsung kembalikan jika ketemu
+
+        # --- LOGIKA REGEX LAMA (Sebagai Cadangan untuk Pola Spesifik) ---     
         match = re.fullmatch(r"([a-zA-Z]+)([0-9]+)", password)
         if match:
             kata_bagian = match.group(1)
             if self.loader.isInDictionary(kata_bagian):
                 weaknesses.append("HYBRID_MATCH")
-                suggestions.append(f"Ini adalah pola 'kata' umum ('{kata_bagian}') diikuti angka. Hindari pola ini.")
-                
+                suggestions.append(f"Pola umum: kata '{kata_bagian}' diikuti angka. Hindari pola ini.")
+
         return weaknesses, suggestions
 
     # --- METODE UTAMA
