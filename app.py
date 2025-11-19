@@ -61,4 +61,4 @@ def handle_analysis():
 # --- Perintah untuk Menjalankan Server ---
 if __name__ == "__main__":
     # app.run(debug=True) akan otomatis me-restart server jika Anda mengubah kode
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)
