@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Password Strength Meter - Skripsi</title>
+    
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            background-color: #f4f7f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            color: #333;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px 40px;
+            border-radius: 12px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.05);
+            width: 90%;
+            max-width: 600px;
+            text-align: center;
+        }
+        h1 { color: #0056b3; margin-top: 0; margin-bottom: 10px; }
+        p.subtitle { color: #555; font-size: 1.1em; margin-bottom: 25px; }
+        
+        /* --- WRAPPER INPUT --- */
+        .input-wrapper {
+            position: relative;
+            width: 95%;
+            margin: 0 auto 15px auto;
+        }
+        
+        #password-input {
+            width: 100%;
+            padding: 12px 45px 12px 15px; 
+            font-size: 1em;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box;
+        }
+        
+        #toggle-password {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            /* Hapus font-size karena kita pakai SVG, ganti dengan width/height */
+            width: 24px; 
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.6;
+            transition: opacity 0.3s;
+        }
+        #toggle-password:hover { opacity: 1; }
+        
+        /* Style untuk SVG agar warnanya abu-abu */
+        #toggle-password svg {
+            fill: #777;
+            width: 20px;
+            height: 20px;
+        }
+
+        /* --- TOMBOL ANALISIS --- */
+        #analyze-button {
+            width: 95%;
+            padding: 12px 20px;
+            font-size: 1.1em;
+            font-weight: bold;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        #analyze-button:hover { background-color: #0056b3; }
+        
+        /* --- AREA HASIL --- */
+        #hasil-analisis {
+            margin-top: 25px; text-align: left; min-height: 50px;
+            border: none; padding: 0;
+        }
+        .strong { color: #2ECC40; font-weight: bold; }
+        
+        /* --- LAYOUT 2 KOLOM (HASIL) --- */
+        .attack-section {
+            background-color: #f9f9f9; border: 1px solid #ddd;
+            border-radius: 8px; padding: 20px; margin-bottom: 15px;
+        }
+        .attack-title {
+            color: #D8000C; font-weight: bold; font-size: 1.1em;
+            margin-top: 0; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px;
+        }
+        .attack-content { display: flex; flex-wrap: wrap; gap: 20px; }
+        .attack-definition {
+            flex: 1; min-width: 200px; font-size: 0.9em;
+            font-weight: bold; color: #444; line-height: 1.5;
+        }
+        .attack-tips {
+            flex: 1; min-width: 200px; background-color: #fff;
+            border: 1px solid #eee; border-radius: 5px; padding: 15px; font-size: 0.9em;
+        }
+        .attack-tips strong { display: block; margin-bottom: 10px; }
+        .attack-tips ul { font-weight: normal; margin: 0; padding-left: 20px; }
+        .attack-tips li { margin-bottom: 8px; }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Password Strength Meter</h1>
+        <p class="subtitle">Aplikasi Pengecek Kekuatan Password</p>
+        
+        <div class="input-wrapper">
+            <input type="password" id="password-input" placeholder="Ketik password Anda di sini...">
+            
+            <span id="toggle-password" title="Tampilkan Password">
+                </span>
+        </div>
+        
+        <button id="analyze-button">Analisis</button>
+        
+        <div id="hasil-analisis">
+            <p style="color: #777;">Silakan masukkan kata sandi untuk dianalisis.</p>
+        </div>
+    </div>
+
+    <script>
+        const tombolAnalisis = document.getElementById("analyze-button");
+        const inputPassword = document.getElementById("password-input");
+        const togglePassword = document.getElementById("toggle-password");
+        const divHasil = document.getElementById("hasil-analisis");
+
+        const iconEyeOpen = `
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+            </svg>
+        `;
+
+
+        const iconEyeSlash = `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M17.94 17.94 6.06 6.06M10.58 10.58 A3 3 0 0 1 13.42 13.42M4.5 4.5 L6.8 6.8C4.8 8 3.3 10 2.5 12 c1.8 4 6 7 9.5 7 c1.5 0 3-.5 4.4-1.2 l2.1 2.1M21.5 12 c-1.8 -4 -6 -7 -9.5 -7 c-.9 0 -1.8.1 -2.6.4l2 2"
+        stroke="#777" stroke-width="2" 
+        fill="none" stroke-linecap="round"
+        stroke-linejoin="round"
+    />
+</svg>`;
+
+
+        togglePassword.innerHTML = iconEyeOpen;
+
+        togglePassword.addEventListener("click", function() {
+            const currentType = inputPassword.getAttribute("type");
+            
+            if (currentType === "password") {
+                inputPassword.setAttribute("type", "text");
+                this.innerHTML = iconEyeSlash; 
+                this.setAttribute("title", "Sembunyikan Password");
+            } else {
+                inputPassword.setAttribute("type", "password");
+                this.innerHTML = iconEyeOpen; 
+                this.setAttribute("title", "Tampilkan Password");
+            }
+        });
+
+        const attackDefinitions = {
+            "BRUTEFORCE": "Serangan ini mencoba semua kemungkinan kombinasi karakter (a, b, c, 1, 2, 3, !, @, #) satu per satu. Semakin pendek dan sederhana kata sandi Anda, semakin cepat serangan ini berhasil.",
+            "DICTIONARY": "Serangan ini menggunakan 'kamus' berisi jutaan kata sandi umum (seperti 'password', '123456', atau nama) yang pernah bocor. Jika kata sandi Anda ada di daftar ini, kata sandi itu bisa langsung dijebol.",
+            "HYBRID": "Serangan ini menggabungkan 'kata' dari kamus dengan pola umum (seperti angka atau simbol yang berurutan). Ini menargetkan pola seperti 'sayang123' atau 'password!'."
+        };
+
+        const weaknessTips = {
+            "BRUTEFORCE_LENGTH": "Tambahkan lebih banyak karakter (minimal 12+).",
+            "BRUTEFORCE_NO_LOWER": "Gunakan setidaknya satu huruf kecil (a-z).",
+            "BRUTEFORCE_NO_UPPER": "Gunakan setidaknya satu huruf besar (A-Z).",
+            "BRUTEFORCE_NO_NUMBER": "Gunakan setidaknya satu angka (0-9).",
+            "BRUTEFORCE_NO_SYMBOL": "Gunakan setidaknya satu simbol (!@#$%).",
+            "DICTIONARY_MATCH": "Ganti total. Password yang Anda gunakan sudah terisi di kamus bocor.",
+            "HYBRID_MATCH": "Hindari pola 'kata' + 'angka' yang berurutan. coba sebarkan 'angka' diantara 'kata' yang digunakan.",
+            "INVALID_INPUT": "Password tidak boleh kosong atau hanya berisi spasi."
+        };
+
+        // --- FUNGSI FETCH ---
+        tombolAnalisis.addEventListener("click", function() {
+            const password = inputPassword.value;
+            divHasil.innerHTML = '<p>Menganalisis...</p>';
+
+            fetch("/analyze", { 
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ "password": password }) 
+            })
+            .then(response => response.json()) 
+            .then(data => {
+                divHasil.innerHTML = ""; 
+
+                if (data.isWeak) {
+                    const bfTips = [];
+                    const dictTips = [];
+                    const hybTips = [];
+                    let hasInvalidInput = false;
+
+                    data.weaknesses.forEach(key => {
+                        const tip = weaknessTips[key] || "Tip tidak dikenal.";
+                        if (key.startsWith("BRUTEFORCE_")) { bfTips.push(tip); } 
+                        else if (key.startsWith("DICTIONARY_")) { dictTips.push(tip); } 
+                        else if (key.startsWith("HYBRID_")) { hybTips.push(tip); } 
+                        else if (key === "INVALID_INPUT") {
+                            hasInvalidInput = true;
+                            divHasil.innerHTML = `<p class="attack-title">${tip}</p>`;
+                        }
+                    });
+
+                    if (!hasInvalidInput) {
+                        if (bfTips.length > 0) {
+                            divHasil.innerHTML += `
+                                <div class="attack-section">
+                                    <h4 class="attack-title">❌ Rentan terhadap Serangan Brute-Force</h4>
+                                    <div class="attack-content">
+                                        <div class="attack-definition"><p>${attackDefinitions.BRUTEFORCE}</p></div>
+                                        <div class="attack-tips"><strong>Tips Perbaikan:</strong><ul>${bfTips.map(tip => `<li>${tip}</li>`).join('')}</ul></div>
+                                    </div>
+                                </div>`;
+                        }
+                        if (dictTips.length > 0) {
+                            divHasil.innerHTML += `
+                                <div class="attack-section">
+                                    <h4 class="attack-title">❌ Rentan terhadap Serangan Kamus (Dictionary)</h4>
+                                    <div class="attack-content">
+                                        <div class="attack-definition"><p>${attackDefinitions.DICTIONARY}</p></div>
+                                        <div class="attack-tips"><strong>Tips Perbaikan:</strong><ul>${dictTips.map(tip => `<li>${tip}</li>`).join('')}</ul></div>
+                                    </div>
+                                </div>`;
+                        }
+                        if (hybTips.length > 0) {
+                            divHasil.innerHTML += `
+                                <div class="attack-section">
+                                    <h4 class="attack-title">❌ Rentan terhadap Serangan Hibrida (Hybrid)</h4>
+                                    <div class="attack-content">
+                                        <div class="attack-definition"><p>${attackDefinitions.HYBRID}</p></div>
+                                        <div class="attack-tips"><strong>Tips Perbaikan:</strong><ul>${hybTips.map(tip => `<li>${tip}</li>`).join('')}</ul></div>
+                                    </div>
+                                </div>`;
+                        }
+                    }
+                } else {
+                    divHasil.innerHTML = '<h4>✅ Selamat! Kata Sandi Anda Kuat.</h4>';
+                    divHasil.innerHTML += `<p class="strong">Kata sandi Anda tidak ditemukan di kamus dan memiliki kombinasi yang kompleks, sehingga sulit untuk ditebak.</p>`;
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                divHasil.innerHTML = '<p class="attack-title">Error: Tidak dapat terhubung ke server analisis.</p>';
+            });
+        });
+    </script>
+</body>
+</html>
