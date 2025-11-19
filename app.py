@@ -25,7 +25,7 @@ CORS(app)
 
 # --- ENDPOINT / ALAMAT URL ---
 
-@app.route("/")
+@app.route("/", methods=["GET"])
 def index():
     """
     Rute ini bertugas menyajikan file 'index.html' 
