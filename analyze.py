@@ -78,29 +78,41 @@ class PasswordAnalyzer:
         return weaknesses, suggestions
 
     def _checkHybrid(self, password):
-        """Aturan #3: Cek Hybrid yang Diperkuat (Strip & Check)."""
+        """Aturan #3: Cek Hybrid (Pola Kata+Angka ATAU Angka+Kata)."""
         weaknesses = []
         suggestions = []
         
-
-        # 1. Ambil HANYA huruf dari password (buang angka & simbol)
+        # --- METODE 1: Strip & Check (Paling Ampuh) ---
+        # Ambil hurufnya saja (buang angka/simbol)
+        # Contoh: "123pass" -> "pass"
         kata_bersih = "".join(filter(str.isalpha, password)).lower()
         
-        # 2. Cek apakah kata bersih tersebut ada di kamus
-        # Syarat: Panjang kata harus > 3 agar tidak mendeteksi kata terlalu pendek (misal 'a' atau 'is')
-        if len(kata_bersih) > 3:
+        # Syarat: Panjang kata > 2 (agar tidak mendeteksi singkatan pendek)
+        if len(kata_bersih) > 2:
             if self.loader.isInDictionary(kata_bersih):
                 weaknesses.append("HYBRID_MATCH")
-                suggestions.append(f"Kata sandi ini hanyalah kata umum '{kata_bersih}' yang ditambahi angka/simbol. Sangat mudah ditebak.")
-                return weaknesses, suggestions # Langsung kembalikan jika ketemu
+                suggestions.append(f"Kata sandi ini mengandung kata umum '{kata_bersih}'. Pola angka+kata atau kata+angka sangat mudah ditebak.")
+                return weaknesses, suggestions # Langsung lapor
 
-        # --- LOGIKA REGEX LAMA (Sebagai Cadangan untuk Pola Spesifik) ---     
-        match = re.fullmatch(r"([a-zA-Z]+)([0-9]+)", password)
-        if match:
-            kata_bagian = match.group(1)
-            if self.loader.isInDictionary(kata_bagian):
+        # --- METODE 2: Regex Pola Spesifik (Cadangan) ---
+        
+        # Pola A: Kata diikuti Angka (contoh: pass123)
+        match1 = re.fullmatch(r"([a-zA-Z]+)([0-9]+)", password)
+        
+        # Pola B: Angka diikuti Kata (contoh: 123pass) <-- INI YANG KURANG TADI
+        match2 = re.fullmatch(r"([0-9]+)([a-zA-Z]+)", password)
+        
+        kata_ditemukan = None
+        
+        if match1:
+            kata_ditemukan = match1.group(1) # Ambil bagian huruf
+        elif match2:
+            kata_ditemukan = match2.group(2) # Ambil bagian huruf
+            
+        if kata_ditemukan:
+            if self.loader.isInDictionary(kata_ditemukan):
                 weaknesses.append("HYBRID_MATCH")
-                suggestions.append(f"Pola umum: kata '{kata_bagian}' diikuti angka. Hindari pola ini.")
+                suggestions.append(f"Pola umum: Angka digabung dengan kata umum '{kata_ditemukan}'. Hindari pola ini.")
 
         return weaknesses, suggestions
 
