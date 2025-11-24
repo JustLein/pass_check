@@ -6,6 +6,26 @@
     <title>Password Strength Checker - Skripsi</title>
     
     <style>
+        #challenge-link {
+            display: block; /* Agar tombol turun ke baris baru */
+            width: 95%;
+            padding: 12px 20px;
+            font-size: 1.1em;
+            font-weight: bold;
+            background-color: #28a745; /* Warna HIJAU */
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none; /* Menghilangkan garis bawah link */
+            box-sizing: border-box; /* Agar padding tidak menambah lebar */
+            margin-top: 15px; /* Jarak dari tombol Analisis */
+            transition: background-color 0.3s ease;
+        }
+        #challenge-link:hover {
+            background-color: #218838; /* Warna Hijau lebih gelap saat hover */
+        }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
             background-color: #f4f7f6;
@@ -126,7 +146,12 @@
             <span id="toggle-password" title="Tampilkan Password">
                 </span>
         </div>
+        <button id="analyze-button">Analisis</button>
         
+        <a href="/tantangan" id="challenge-link">🎯 Masuk ke Mode Tantangan</a>
+        
+        <div id="hasil-analisis">
+            ```
         <button id="analyze-button">Analisis</button>
         
         <div id="hasil-analisis">

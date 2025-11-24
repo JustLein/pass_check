@@ -73,7 +73,7 @@ class PasswordAnalyzer:
         
         if self.loader.isInDictionary(password):
             weaknesses.append("DICTIONARY_MATCH")
-            suggestions.append("Kata sandi ini ada di daftar kata sandi bocor. Ganti total.")
+            suggestions.append("Ganti total. Password yang Anda gunakan sudah terisi di kamus bocor.")
             
         return weaknesses, suggestions
 
@@ -84,7 +84,6 @@ class PasswordAnalyzer:
         
         # --- METODE 1: Strip & Check (Paling Ampuh) ---
         # Ambil hurufnya saja (buang angka/simbol)
-        # Contoh: "123pass" -> "pass"
         kata_bersih = "".join(filter(str.isalpha, password)).lower()
         
         # Syarat: Panjang kata > 2 (agar tidak mendeteksi singkatan pendek)
@@ -96,10 +95,10 @@ class PasswordAnalyzer:
 
         # --- METODE 2: Regex Pola Spesifik (Cadangan) ---
         
-        # Pola A: Kata diikuti Angka (contoh: pass123)
+        # Pola A: Kata diikuti Angka
         match1 = re.fullmatch(r"([a-zA-Z]+)([0-9]+)", password)
         
-        # Pola B: Angka diikuti Kata (contoh: 123pass) <-- INI YANG KURANG TADI
+        # Pola B: Angka diikuti Kata
         match2 = re.fullmatch(r"([0-9]+)([a-zA-Z]+)", password)
         
         kata_ditemukan = None

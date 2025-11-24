@@ -34,6 +34,10 @@ def index():
     """
     return render_template("index.html")
 
+@app.route("/tantangan")
+def tantangan_page():
+    return render_template("tantangan.html")
+
 @app.route("/analyze", methods=["POST"])
 def handle_analysis():
     """
