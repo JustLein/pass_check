@@ -140,7 +140,7 @@
 <body>
 
     <div class="container">
-        <h1>Password Strength Meter</h1>
+        <h1>Password Strength Checker</h1>
         <p class="subtitle">Aplikasi Pengecek Kekuatan Password</p>
         
         <div class="input-wrapper">
@@ -228,31 +228,34 @@
                 body: JSON.stringify({ "password": password }) 
             })
             .then(response => response.json()) 
-            .then(data => {
+.then(data => {
                 divHasil.innerHTML = ""; 
 
                 if (data.isWeak) {
                     const bfTips = [];
                     const dictTips = [];
                     const hybTips = [];
-                    const patternTips = [];
+                    const patternTips = []; // Array untuk Pattern
                     let hasInvalidInput = false;
 
+                    // 1. PILAH PESAN KE KATEGORI
                     data.weaknesses.forEach(key => {
                         const tip = weaknessTips[key] || "Tip tidak dikenal.";
+                        
                         if (key.startsWith("BRUTEFORCE_")) { bfTips.push(tip); } 
                         else if (key.startsWith("DICTIONARY_")) { dictTips.push(tip); } 
                         else if (key.startsWith("HYBRID_")) { hybTips.push(tip); } 
+                        else if (key.startsWith("PATTERN_")) { patternTips.push(tip); } // Cek Pattern
                         else if (key === "INVALID_INPUT") {
                             hasInvalidInput = true;
-                            divHasil.innerHTML = `<p class="attack-title">${tip}</p>`;
-                        }
-                        else if (key.startsWith("PATTERN_")) { 
-                        patternTips.push(tip); 
+                            divHasil.innerHTML = `<p class="attack-title" style="text-align: center;">${tip}</p>`;
                         }
                     });
 
+                    // 2. RENDER HTML JIKA VALID
                     if (!hasInvalidInput) {
+                        
+                        // --- BAGIAN BRUTE FORCE ---
                         if (bfTips.length > 0) {
                             divHasil.innerHTML += `
                                 <div class="attack-section">
@@ -263,6 +266,8 @@
                                     </div>
                                 </div>`;
                         }
+                        
+                        // --- BAGIAN DICTIONARY ---
                         if (dictTips.length > 0) {
                             divHasil.innerHTML += `
                                 <div class="attack-section">
@@ -273,6 +278,8 @@
                                     </div>
                                 </div>`;
                         }
+                        
+                        // --- BAGIAN HYBRID ---
                         if (hybTips.length > 0) {
                             divHasil.innerHTML += `
                                 <div class="attack-section">
@@ -283,18 +290,22 @@
                                     </div>
                                 </div>`;
                         }
+
+                        // --- BAGIAN PATTERN (YANG BARU) ---
                         if (patternTips.length > 0) {
-                             divHasil.innerHTML += `
+                            divHasil.innerHTML += `
                                 <div class="attack-section">
-                                <h4 class="attack-title">❌ Pola Mudah Ditebak (Pattern Recognition)</h4>
-                                <div class="attack-content">
-                                    <div class="attack-definition"><p>${attackDefinitions.PATTERN}</p></div>
-                                    <div class="attack-tips"><strong>Tips Perbaikan:</strong><ul>${patternTips.map(tip => `<li>${tip}</li>`).join('')}</ul></div>
-                                </div>
-                            </div>`;
+                                    <h4 class="attack-title">❌ Pola Mudah Ditebak (Pattern Recognition)</h4>
+                                    <div class="attack-content">
+                                        <div class="attack-definition"><p>${attackDefinitions.PATTERN}</p></div>
+                                        <div class="attack-tips"><strong>Tips Perbaikan:</strong><ul>${patternTips.map(tip => `<li>${tip}</li>`).join('')}</ul></div>
+                                    </div>
+                                </div>`;
                         }
                     }
+
                 } else {
+                    // JIKA KUAT
                     divHasil.innerHTML = '<h4>✅ Selamat! Kata Sandi Anda Kuat.</h4>';
                     divHasil.innerHTML += `<p class="strong">Kata sandi Anda tidak ditemukan di kamus dan memiliki kombinasi yang kompleks, sehingga sulit untuk ditebak.</p>`;
                 }
