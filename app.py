@@ -27,11 +27,6 @@ CORS(app)
 
 @app.route("/", methods=["GET"])
 def index():
-    """
-    Rute ini bertugas menyajikan file 'index.html' 
-    yang ada di dalam folder 'templates'.
-    (Ini adalah metode Jinja/Server-Side, jika Anda mau)
-    """
     return render_template("index.html")
 
 @app.route("/tantangan")
