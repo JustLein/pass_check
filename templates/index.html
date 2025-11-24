@@ -201,6 +201,7 @@
             "BRUTEFORCE": "Serangan ini mencoba semua kemungkinan kombinasi karakter (a, b, c, 1, 2, 3, !, @, #) satu per satu. Semakin pendek dan sederhana kata sandi Anda, semakin cepat serangan ini berhasil.",
             "DICTIONARY": "Serangan ini menggunakan 'kamus' berisi jutaan kata sandi umum (seperti 'password', '123456', atau nama) yang pernah bocor. Jika kata sandi Anda ada di daftar ini, kata sandi itu bisa langsung dijebol.",
             "HYBRID": "Serangan ini menggabungkan 'kata' dari kamus dengan pola umum (seperti angka atau simbol yang berurutan). Ini menargetkan pola seperti 'sayang123' atau 'password!'."
+            "PATTERN": "Serangan ini menebak pola perilaku manusia yang mensimpulkan password, seperti mengetik tombol yang bersebelahan (qwerty), urutan angka (123), atau huruf yang sama berulang (aaa)."
         };
 
         const weaknessTips = {
@@ -212,6 +213,9 @@
             "DICTIONARY_MATCH": "Ganti total. Password yang Anda gunakan sudah terisi di kamus bocor.",
             "HYBRID_MATCH": "Hindari pola 'kata' + 'angka' yang berurutan. coba sebarkan 'angka' diantara 'kata' yang digunakan.",
             "INVALID_INPUT": "Password tidak boleh kosong atau hanya berisi spasi."
+            "PATTERN_REPEAT": "Jangan gunakan karakter berulang (misal: aaa).",
+            "PATTERN_SEQUENCE": "Acak urutan karakter, jangan berurutan (misal: abc/123).",
+            "PATTERN_KEYBOARD": "Lompat-lompatlah saat mengetik di keyboard, jangan geser ke samping (misal: qwerty)."
         };
 
         // --- FUNGSI FETCH ---
@@ -232,6 +236,7 @@
                     const bfTips = [];
                     const dictTips = [];
                     const hybTips = [];
+                    const patternTips = [];
                     let hasInvalidInput = false;
 
                     data.weaknesses.forEach(key => {
@@ -242,6 +247,9 @@
                         else if (key === "INVALID_INPUT") {
                             hasInvalidInput = true;
                             divHasil.innerHTML = `<p class="attack-title">${tip}</p>`;
+                        }
+                        else if (key.startsWith("PATTERN_")) { 
+                        patternTips.push(tip); 
                         }
                     });
 
@@ -275,6 +283,16 @@
                                         <div class="attack-tips"><strong>Tips Perbaikan:</strong><ul>${hybTips.map(tip => `<li>${tip}</li>`).join('')}</ul></div>
                                     </div>
                                 </div>`;
+                        }
+                        if (patternTips.length > 0) {
+                             divHasil.innerHTML += `
+                                <div class="attack-section">
+                                <h4 class="attack-title">❌ Pola Mudah Ditebak (Pattern Recognition)</h4>
+                                <div class="attack-content">
+                                    <div class="attack-definition"><p>${attackDefinitions.PATTERN}</p></div>
+                                    <div class="attack-tips"><strong>Tips Perbaikan:</strong><ul>${patternTips.map(tip => `<li>${tip}</li>`).join('')}</ul></div>
+                                </div>
+                            </div>`;
                         }
                     }
                 } else {

@@ -39,8 +39,6 @@ class PasswordAnalyzer:
     def __init__(self, loader: DictionaryLoader):
         self.loader = loader
 
-    # --- METODE ATURAN
-    
     def _checkBruteForce(self, password):
         weaknesses = []
         suggestions = []
@@ -83,7 +81,7 @@ class PasswordAnalyzer:
         suggestions = []
         
         # --- METODE 1: Strip & Check (Paling Ampuh) ---
-        # Ambil hurufnya saja (buang angka/simbol)
+
         kata_bersih = "".join(filter(str.isalpha, password)).lower()
         
         # Syarat: Panjang kata > 2 (agar tidak mendeteksi singkatan pendek)
@@ -95,18 +93,17 @@ class PasswordAnalyzer:
 
         # --- METODE 2: Regex Pola Spesifik (Cadangan) ---
         
-        # Pola A: Kata diikuti Angka
+
         match1 = re.fullmatch(r"([a-zA-Z]+)([0-9]+)", password)
         
-        # Pola B: Angka diikuti Kata
         match2 = re.fullmatch(r"([0-9]+)([a-zA-Z]+)", password)
         
         kata_ditemukan = None
         
         if match1:
-            kata_ditemukan = match1.group(1) # Ambil bagian huruf
+            kata_ditemukan = match1.group(1) 
         elif match2:
-            kata_ditemukan = match2.group(2) # Ambil bagian huruf
+            kata_ditemukan = match2.group(2) 
             
         if kata_ditemukan:
             if self.loader.isInDictionary(kata_ditemukan):
@@ -115,6 +112,64 @@ class PasswordAnalyzer:
 
         return weaknesses, suggestions
 
+    # --- METODE (CheckSequence) ---
+    
+    def _checkSequenceAndKeyboard(self, password):
+        """
+        Aturan Tambahan: Cek pola berurutan (abc, 123), berulang (aaa), 
+        dan pola keyboard (qwerty)
+        """
+        weaknesses = []
+        suggestions = []
+        password_lower = password.lower()
+
+        # 1. Cek Pengulangan Karakter (Repetition) - Contoh: "aaaaa"
+        # Mengecek apakah ada karakter yang muncul 3x berturut-turut
+        for i in range(len(password) - 2):
+            if password[i] == password[i+1] == password[i+2]:
+                weaknesses.append("PATTERN_REPEAT")
+                suggestions.append("Jangan mengulang karakter yang sama lebih dari 2 kali berturut-turut.")
+                break # Cukup lapor sekali
+
+        # 2. Cek Urutan Alfabet/Angka (Sequence) - Contoh: "abc", "123"
+        # Menggunakan nilai ASCII (ord)
+        for i in range(len(password) - 2):
+
+            if ord(password[i]) + 1 == ord(password[i+1]) and ord(password[i+1]) + 1 == ord(password[i+2]):
+                weaknesses.append("PATTERN_SEQUENCE")
+                suggestions.append("Hindari pola urutan alfabet atau angka (seperti abc, 123).")
+                break
+
+            if ord(password[i]) - 1 == ord(password[i+1]) and ord(password[i+1]) - 1 == ord(password[i+2]):
+                weaknesses.append("PATTERN_SEQUENCE")
+                suggestions.append("Hindari pola urutan mundur (seperti cba, 321).")
+                break
+
+        # 3. Cek Pola Keyboard (Spatial) - Contoh: "qwerty", "asdf"
+        # Definisi baris keyboard
+        keyboard_rows = [
+            "qwertyuiop",
+            "asdfghjkl",
+            "zxcvbnm",
+            "1234567890"
+        ]
+        
+        found_keyboard_pattern = False
+        for i in range(len(password_lower) - 2):
+            chunk = password_lower[i:i+3] # Ambil potongan 3 huruf
+            for row in keyboard_rows:
+                if chunk in row or chunk in row[::-1]: # Cek maju atau mundur
+                    found_keyboard_pattern = True
+                    break
+            if found_keyboard_pattern:
+                break
+        
+        if found_keyboard_pattern:
+            weaknesses.append("PATTERN_KEYBOARD")
+            suggestions.append("Hindari pola keyboard yang berurutan (seperti qwerty, asdf).")
+
+        return weaknesses, suggestions
+    
     # --- METODE UTAMA
     def analyze(self, password):
         result = AnalysisResult()
@@ -136,6 +191,10 @@ class PasswordAnalyzer:
         hyb_w, hyb_s = self._checkHybrid(password)
         result.weaknesses.extend(hyb_w)
         result.suggestions.extend(hyb_s)
+        
+        seq_w, seq_s = self._checkSequenceAndKeyboard(password)
+        result.weaknesses.extend(seq_w)
+        result.suggestions.extend(seq_s)
 
         if result.weaknesses:
             result.isWeak = True
