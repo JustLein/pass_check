@@ -14,28 +14,17 @@
             min-height: 100vh;
             margin: 0;
             color: #333;
-            position: relative; /* Untuk posisi tombol kembali */
+            position: relative;
         }
         
-        /* TOMBOL KEMBALI (BARU) */
+        /* TOMBOL KEMBALI */
         .back-link {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            text-decoration: none;
-            color: #555;
-            font-weight: bold;
-            font-size: 0.9em;
-            background: white;
-            padding: 8px 15px;
-            border-radius: 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            transition: all 0.3s;
+            position: absolute; top: 20px; left: 20px;
+            text-decoration: none; color: #555; font-weight: bold; font-size: 0.9em;
+            background: white; padding: 8px 15px; border-radius: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); transition: all 0.3s;
         }
-        .back-link:hover {
-            color: #007bff;
-            transform: translateX(-3px); /* Efek geser sedikit */
-        }
+        .back-link:hover { color: #007bff; transform: translateX(-3px); }
 
         .container {
             background-color: #ffffff;
@@ -53,14 +42,15 @@
             margin: 20px 0; width: 100%; overflow: hidden;
         }
         .progress-bar {
-            background-color: #2ECC40; height: 100%; width: 16%; transition: width 0.5s ease;
+            background-color: #2ECC40; height: 100%; width: 14%; /* 100/7 = ~14% */
+            transition: width 0.5s ease;
         }
         .level-badge {
             background: #007bff; color: white; padding: 5px 15px;
             border-radius: 20px; font-size: 0.9em; font-weight: bold;
             display: inline-block; margin-bottom: 15px;
         }
-        .instruction { font-size: 1.1em; margin-bottom: 20px; min-height: 50px; }
+        .instruction { font-size: 1.1em; margin-bottom: 20px; min-height: 60px; line-height: 1.5; }
         
         .input-wrapper {
             position: relative; width: 95%; margin: 0 auto 15px auto; height: 48px;
@@ -94,7 +84,7 @@
 
     <div class="container">
         <h1>Mode Tantangan</h1>
-        <div class="level-badge">Level <span id="level-num">1</span>/6</div>
+        <div class="level-badge">Level <span id="level-num">1</span>/7</div>
         
         <div class="progress-container">
             <div class="progress-bar" id="progress-bar"></div>
@@ -119,13 +109,15 @@
         let currentLevel = 1;
         let savedPassword = ""; 
 
+        // UPDATE: Definisi 7 Level
         const levels = {
             1: "Langkah 1 (Dasar): Buat password dengan panjang minimal 8 karakter.",
             2: "Langkah 2 (Variasi): Perkuat password tersebut. Tambahkan setidaknya satu Angka dan satu Simbol.",
             3: "Langkah 3 (Kapital): Tambahkan setidaknya satu Huruf Kapital (Huruf Besar).",
-            4: "Langkah 4 (Kamus): Pastikan password tidak terdeteksi sebagai kata umum (Dictionary Attack).",
-            5: "Langkah 5 (Pola): Hindari pola Hybrid (Kata+Angka). Buat lebih acak.",
-            6: "Langkah 6 (Ingatan): Masukkan ulang password terakhir Anda tanpa melihat!"
+            4: "Langkah 4 (Pola): Hindari pola keyboard (qwerty), urutan (123/abc), atau pengulangan (aaa).",
+            5: "Langkah 5 (Kamus): Pastikan password tidak terdeteksi sebagai kata umum (Dictionary Attack).",
+            6: "Langkah 6 (Hybrid): Hindari pola Hybrid (Kata+Angka) seperti 'pass123'. Buat lebih acak.",
+            7: "Langkah 7 (Ingatan): Masukkan ulang password terakhir Anda tanpa melihat!"
         };
 
         const input = document.getElementById('challenge-input');
@@ -141,23 +133,22 @@
             msg.textContent = "Menganalisis...";
             msg.className = "";
 
-            // --- 1. CEK INPUT KOSONG SECARA LOKAL (Paling Cepat) ---
             if (!password || password.trim() === "") {
                 msg.textContent = "Error: Password tidak boleh kosong!";
                 msg.className = "error";
-                return; // Berhenti di sini, jangan kirim ke server
+                return;
             }
 
-            // Khusus Level 6 (Cek Lokal)
-            if (currentLevel === 6) {
+            // Khusus Level Terakhir (7) - Cek Lokal
+            if (currentLevel === 7) {
                 if (password === savedPassword) {
-                    msg.textContent = "SELAMAT! Anda berhasil mengingat password kuat Anda.";
+                    msg.textContent = "SELAMAT! Anda lulus semua tantangan.";
                     msg.className = "success";
                     btn.textContent = "Selesai (Ulangi)";
                     input.disabled = true;
                     setTimeout(() => { if(confirm("Tantangan Selesai! Mau coba lagi?")) location.reload(); }, 2000);
                 } else {
-                    msg.textContent = "Salah! Password tidak cocok dengan yang Anda buat di Level 5.";
+                    msg.textContent = "Salah! Password tidak cocok dengan yang Anda buat di Level 6.";
                     msg.className = "error";
                 }
                 return;
@@ -173,68 +164,74 @@
                 let passed = false;
                 let errorText = "";
 
-                // --- 2. CEK INPUT TIDAK VALID DARI SERVER (Jaga-jaga) ---
                 if (data.weaknesses.includes("INVALID_INPUT")) {
-                    msg.textContent = "Error: Input tidak valid (kosong atau spasi).";
-                    msg.className = "error";
-                    return; // Berhenti di sini
+                    msg.textContent = "Error: Input tidak valid."; msg.className = "error"; return;
                 }
 
-                // --- LOGIKA PER LEVEL ---
+                // --- LOGIKA PER LEVEL (UPDATED) ---
 
-                // Level 1: Cek Panjang
+                // Level 1: Panjang
                 if (currentLevel === 1) {
                     if (data.weaknesses.includes("BRUTEFORCE_LENGTH")) { 
                         errorText = "Gagal: Password masih kurang dari 8 karakter."; 
-                    } else { 
-                        passed = true; 
-                    }
+                    } else { passed = true; }
                 }
                 
-                // Level 2: Cek Angka & Simbol
+                // Level 2: Angka & Simbol
                 else if (currentLevel === 2) {
                     if (data.weaknesses.includes("BRUTEFORCE_NO_NUMBER") || data.weaknesses.includes("BRUTEFORCE_NO_SYMBOL")) { 
                         errorText = "Gagal: Harus ada Angka DAN Simbol."; 
-                    } else { 
-                        passed = true; 
-                    }
+                    } else { passed = true; }
                 }
 
-                // Level 3: Cek Kapital
+                // Level 3: Kapital
                 else if (currentLevel === 3) {
                     if (data.weaknesses.includes("BRUTEFORCE_NO_UPPER")) { 
                         errorText = "Gagal: Belum ada Huruf Kapital."; 
-                    } else { 
-                        passed = true; 
-                    }
+                    } else { passed = true; }
                 }
 
-                // Level 4: Cek Dictionary
+                // Level 4 (BARU): Pola (Pattern)
                 else if (currentLevel === 4) {
+                    // Cek kode error pattern yang kita buat di Python
+                    const hasPatternError = data.weaknesses.some(w => 
+                        w === "BRUTEFORCE_SEQUENCE" || 
+                        w === "BRUTEFORCE_REPEAT" || 
+                        w === "BRUTEFORCE_KEYBOARD"
+                    );
+                    
+                    if (hasPatternError) {
+                        errorText = "Gagal: Pola mudah ditebak terdeteksi (urutan, keyboard, atau pengulangan).";
+                    } else { passed = true; }
+                }
+
+                // Level 5: Dictionary
+                else if (currentLevel === 5) {
                     const isDict = data.weaknesses.some(w => w.includes("DICTIONARY"));
                     if (isDict) { 
                         errorText = "Gagal: Password terdeteksi di dalam kamus (Dictionary Attack)."; 
-                    } else { 
-                        passed = true; 
-                    }
+                    } else { passed = true; }
                 }
 
-                // Level 5: Cek Hybrid
-                else if (currentLevel === 5) {
+                // Level 6: Hybrid
+                else if (currentLevel === 6) {
                     const isHybrid = data.weaknesses.some(w => w.includes("HYBRID"));
                     const isDict = data.weaknesses.some(w => w.includes("DICTIONARY"));
-                    
+                    const hasPattern = data.weaknesses.some(w => w.includes("BRUTEFORCE_SEQUENCE") || w.includes("BRUTEFORCE_REPEAT") || w.includes("BRUTEFORCE_KEYBOARD"));
+
                     if (isHybrid) { 
                         errorText = "Gagal: Pola Hybrid terdeteksi (Kata + Angka). Buat lebih acak."; 
                     } else if (isDict) { 
-                        errorText = "Gagal: Password jadi mirip kata kamus lagi. Ubah strukturnya."; 
+                        errorText = "Gagal: Password jadi mirip kata kamus. Ubah strukturnya."; 
+                    } else if (hasPattern) {
+                        errorText = "Gagal: Jangan kembali menggunakan pola sederhana (abc/123).";
                     } else { 
                         passed = true; 
-                        savedPassword = password; 
+                        savedPassword = password; // Simpan untuk Level 7
                     }
                 }
 
-                // --- EKSEKUSI HASIL ---
+                // --- EKSEKUSI ---
                 if (passed) {
                     currentLevel++;
                     updateUI();
@@ -244,19 +241,20 @@
                     msg.className = "error";
                 }
             })
-            .catch(err => { 
-                console.error(err); 
-                msg.textContent = "Error koneksi server."; 
-            });
+            .catch(err => { console.error(err); msg.textContent = "Error koneksi server."; });
         });
 
         function updateUI() {
             levelNum.textContent = currentLevel;
             instrText.textContent = levels[currentLevel];
-            const progressPercent = (currentLevel / 6) * 100;
+            
+            // Hitung Progress Bar (100 / 7)
+            const progressPercent = (currentLevel / 7) * 100;
             progressBar.style.width = progressPercent + "%";
-            if (currentLevel === 6) {
-                input.value = "";
+
+            // Khusus Level Terakhir (7)
+            if (currentLevel === 7) {
+                input.value = ""; // KOSONGKAN INPUT
                 input.placeholder = "Ingat kembali password tadi...";
                 btn.textContent = "Cek Ingatan";
             }
