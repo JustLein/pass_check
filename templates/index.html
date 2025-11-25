@@ -144,7 +144,7 @@
 <body>
 
     <div class="container">
-        <h1>Password Strength Meter</h1>
+        <h1>Password Strength Checker</h1>
         <p class="subtitle">Aplikasi Pengecek Kekuatan Password</p>
         
         <div class="input-wrapper">
@@ -187,7 +187,6 @@
             "BRUTEFORCE": "Serangan ini mencoba semua kemungkinan kombinasi karakter (a, b, c, 1, 2, 3, !, @, #) satu per satu. Semakin pendek dan sederhana kata sandi Anda, semakin cepat serangan ini berhasil.",
             "DICTIONARY": "Serangan ini menggunakan 'kamus' berisi jutaan kata sandi umum yang pernah bocor. Jika kata sandi Anda ada di daftar ini, kata sandi itu bisa langsung dijebol.",
             "HYBRID": "Serangan ini menggabungkan 'kata kamus' dengan pola umum (seperti angka atau simbol). Contoh: 'sayang123' atau 'password!'.",
-            "PATTERN": "Serangan ini menebak pola perilaku manusia yang mudah dipikirkan, seperti mengetik tombol yang bersebelahan di keyboard (qwerty), urutan angka (123), atau huruf yang sama berulang (aaa)."
         };
 
         const weaknessTips = {
@@ -196,12 +195,13 @@
             "BRUTEFORCE_NO_UPPER": "Gunakan setidaknya satu huruf besar (A-Z).",
             "BRUTEFORCE_NO_NUMBER": "Gunakan setidaknya satu angka (0-9).",
             "BRUTEFORCE_NO_SYMBOL": "Gunakan setidaknya satu simbol (!@#$%).",
+            "BRUTEFORCE_REPEAT": "Jangan gunakan karakter berulang (misal: aaa).",
+            "BRUTEFORCE_SEQUENCE": "Acak urutan karakter, jangan berurutan (misal: abc/123).",
+            "BRUTEFORCE_KEYBOARD": "Lompat-lompatlah saat mengetik, jangan geser tombol sebelah (misal: qwerty).",
+            // --------------------------------------------------
             "DICTIONARY_MATCH": "Ganti total. Kata sandi Anda ada di kamus bocor.",
             "HYBRID_MATCH": "Hindari pola 'kata' + 'angka'. Buat lebih acak.",
-            "PATTERN_REPEAT": "Jangan gunakan karakter berulang (misal: aaa).",
-            "PATTERN_SEQUENCE": "Acak urutan karakter, jangan berurutan (misal: abc/123).",
-            "PATTERN_KEYBOARD": "Lompat-lompatlah saat mengetik, jangan geser tombol sebelah (misal: qwerty).",
-            "INVALID_INPUT": "Password tidak boleh kosong atau hanya berisi spasi."
+            "INVALID_INPUT": "Input tidak boleh kosong atau hanya berisi spasi."
         };
 
         // --- 4. FUNGSI FETCH (LOGIKA TOMBOL) ---

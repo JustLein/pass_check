@@ -127,7 +127,7 @@ class PasswordAnalyzer:
         # Mengecek apakah ada karakter yang muncul 3x berturut-turut
         for i in range(len(password) - 2):
             if password[i] == password[i+1] == password[i+2]:
-                weaknesses.append("PATTERN_REPEAT")
+                weaknesses.append("BRUTEFORCE_REPEAT")
                 suggestions.append("Jangan mengulang karakter yang sama lebih dari 2 kali berturut-turut.")
                 break # Cukup lapor sekali
 
@@ -136,12 +136,12 @@ class PasswordAnalyzer:
         for i in range(len(password) - 2):
 
             if ord(password[i]) + 1 == ord(password[i+1]) and ord(password[i+1]) + 1 == ord(password[i+2]):
-                weaknesses.append("PATTERN_SEQUENCE")
+                weaknesses.append("BRUTEFORCE_SEQUENCE")
                 suggestions.append("Hindari pola urutan alfabet atau angka (seperti abc, 123).")
                 break
 
             if ord(password[i]) - 1 == ord(password[i+1]) and ord(password[i+1]) - 1 == ord(password[i+2]):
-                weaknesses.append("PATTERN_SEQUENCE")
+                weaknesses.append("BRUTEFORCE_SEQUENCE")
                 suggestions.append("Hindari pola urutan mundur (seperti cba, 321).")
                 break
 
@@ -158,14 +158,14 @@ class PasswordAnalyzer:
         for i in range(len(password_lower) - 2):
             chunk = password_lower[i:i+3] # Ambil potongan 3 huruf
             for row in keyboard_rows:
-                if chunk in row or chunk in row[::-1]: # Cek maju atau mundur
+                if chunk in row or chunk in row[::-1]:
                     found_keyboard_pattern = True
                     break
             if found_keyboard_pattern:
                 break
         
         if found_keyboard_pattern:
-            weaknesses.append("PATTERN_KEYBOARD")
+            weaknesses.append("BRUTEFORCE_SEQUENCE")
             suggestions.append("Hindari pola keyboard yang berurutan (seperti qwerty, asdf).")
 
         return weaknesses, suggestions
