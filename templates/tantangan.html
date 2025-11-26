@@ -111,13 +111,13 @@
 
         // UPDATE: Definisi 7 Level
         const levels = {
-            1: "Langkah 1 (Dasar): Buat password dengan panjang minimal 8 karakter.",
-            2: "Langkah 2 (Variasi): Perkuat password tersebut. Tambahkan setidaknya satu Angka dan satu Simbol.",
-            3: "Langkah 3 (Kapital): Tambahkan setidaknya satu Huruf Kapital (Huruf Besar).",
-            4: "Langkah 4 (Pola): Hindari pola keyboard (qwerty), urutan (123/abc), atau pengulangan (aaa).",
-            5: "Langkah 5 (Kamus): Pastikan password tidak terdeteksi sebagai kata umum (Dictionary Attack).",
+            1: "Langkah 1 (Dasar): Buat kata sandi dengan panjang minimal 8 karakter.",
+            2: "Langkah 2 (Variasi): Perkuat kata sandi tersebut. Tambahkan setidaknya satu Angka dan satu Simbol.",
+            3: "Langkah 3 (Kapital): Tambahkan satu Huruf Kapital (Huruf Besar).",
+            4: "Langkah 4 (Pola): Hindari pola keyboard (qwerty), urutan (123/abc), atau pengulangan (aaa) saat membuat kata sandi.",
+            5: "Langkah 5 (Kamus): Pastikan kata sandi tidak terdeteksi sebagai kata umum / kata sandi yang pernah bocor (Dictionary Attack).",
             6: "Langkah 6 (Hybrid): Hindari pola Hybrid (Kata+Angka) seperti 'pass123'. Buat lebih acak.",
-            7: "Langkah 7 (Ingatan): Masukkan ulang password terakhir Anda dari level 6."
+            7: "Langkah 7 (Ingatan): Masukkan ulang kata sandi terakhir Anda dari level 6."
         };
 
         const input = document.getElementById('challenge-input');
@@ -134,7 +134,7 @@
             msg.className = "";
 
             if (!password || password.trim() === "") {
-                msg.textContent = "Error: Password tidak boleh kosong!";
+                msg.textContent = "Error: Kata sandi tidak boleh kosong!";
                 msg.className = "error";
                 return;
             }
