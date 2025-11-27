@@ -236,7 +236,6 @@
                         if (key.startsWith("BRUTEFORCE_")) { bfTips.push(tip); } 
                         else if (key.startsWith("DICTIONARY_")) { dictTips.push(tip); } 
                         else if (key.startsWith("HYBRID_")) { hybTips.push(tip); }
-                        else if (key.startsWith("PATTERN_")) { patternTips.push(tip); }
                         else if (key === "INVALID_INPUT") {
                             hasInvalidInput = true;
                             divHasil.innerHTML = `<p class="attack-title" style="text-align: center; color: #D8000C;">⚠️ ${tip}</p>`;
@@ -252,9 +251,6 @@
                         }
                         if (hybTips.length > 0) {
                             divHasil.innerHTML += renderSection("❌ Rentan terhadap Serangan Hibrida (Hybrid)", attackDefinitions.HYBRID, hybTips);
-                        }
-                        if (patternTips.length > 0) {
-                            divHasil.innerHTML += renderSection("❌ Pola Mudah Ditebak (Pattern Recognition)", attackDefinitions.PATTERN, patternTips);
                         }
                     }
                 } else {
