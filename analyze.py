@@ -80,7 +80,7 @@ class PasswordAnalyzer:
         weaknesses = []
         suggestions = []
         
-        # --- METODE 1: Strip & Check (Paling Ampuh) ---
+        # --- METODE 1: Strip & Check ---
 
         kata_bersih = "".join(filter(str.isalpha, password)).lower()
         
@@ -89,11 +89,10 @@ class PasswordAnalyzer:
             if self.loader.isInDictionary(kata_bersih):
                 weaknesses.append("HYBRID_MATCH")
                 suggestions.append(f"Kata sandi ini mengandung kata umum '{kata_bersih}'. Pola angka+kata atau kata+angka sangat mudah ditebak.")
-                return weaknesses, suggestions # Langsung lapor
+                return weaknesses, suggestions
 
-        # --- METODE 2: Regex Pola Spesifik (Cadangan) ---
+        # --- METODE 2: Regex Pola Spesifik ---
         
-
         match1 = re.fullmatch(r"([a-zA-Z]+)([0-9]+)", password)
         
         match2 = re.fullmatch(r"([0-9]+)([a-zA-Z]+)", password)
@@ -128,12 +127,10 @@ class PasswordAnalyzer:
 
         # 2. Cek Urutan (Sequence - abc/123)
         for i in range(len(password) - 2):
-            # Maju
             if ord(password[i]) + 1 == ord(password[i+1]) and ord(password[i+1]) + 1 == ord(password[i+2]):
                 weaknesses.append("BRUTEFORCE_SEQUENCE")
                 suggestions.append("Hindari urutan alfabet/angka (misal: abc, 123).")
                 break
-            # Mundur
             if ord(password[i]) - 1 == ord(password[i+1]) and ord(password[i+1]) - 1 == ord(password[i+2]):
                 weaknesses.append("BRUTEFORCE_SEQUENCE")
                 suggestions.append("Hindari urutan mundur (misal: cba, 321).")

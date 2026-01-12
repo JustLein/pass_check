@@ -109,7 +109,6 @@
         let currentLevel = 1;
         let savedPassword = ""; 
 
-        // UPDATE: Definisi 7 Level
         const levels = {
             1: "Langkah 1 (Dasar): Buat kata sandi sendiri dengan panjang minimal 8 karakter.",
             2: "Langkah 2 (Variasi): Perkuat kata sandi sendiri tersebut. Tambahkan setidaknya satu Angka dan satu Simbol.",
@@ -139,7 +138,6 @@
                 return;
             }
 
-            // Khusus Level Terakhir (7) - Cek Lokal
             if (currentLevel === 7) {
                 if (password === savedPassword) {
                     msg.textContent = "SELAMAT! Anda lulus semua tantangan.";
@@ -168,7 +166,7 @@
                     msg.textContent = "Error: Input tidak valid."; msg.className = "error"; return;
                 }
 
-                // --- LOGIKA PER LEVEL (UPDATED) ---
+                // --- LOGIKA PER LEVEL ---
 
                 // Level 1: Panjang
                 if (currentLevel === 1) {
@@ -191,9 +189,8 @@
                     } else { passed = true; }
                 }
 
-                // Level 4 (BARU): Pola (Pattern)
+                // Level 4 : Pola (Pattern)
                 else if (currentLevel === 4) {
-                    // Cek kode error pattern yang kita buat di Python
                     const hasPatternError = data.weaknesses.some(w => 
                         w === "BRUTEFORCE_SEQUENCE" || 
                         w === "BRUTEFORCE_REPEAT" || 
@@ -231,7 +228,6 @@
                     }
                 }
 
-                // --- EKSEKUSI ---
                 if (passed) {
                     currentLevel++;
                     updateUI();
@@ -254,7 +250,7 @@
 
             // Khusus Level Terakhir (7)
             if (currentLevel === 7) {
-                input.value = ""; // KOSONGKAN INPUT
+                input.value = "";
                 input.placeholder = "Ingat kembali password tadi...";
                 btn.textContent = "Cek Ingatan";
             }
